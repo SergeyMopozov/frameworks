@@ -1,0 +1,1 @@
+Time series preprocessing demand different approach for differnet time series datastructure. Its could be independent multi timeseries data or hierarchical orginized. So that we describe each aproaches.
