@@ -37,5 +37,7 @@ def generate_rolling_statistics(timeseries, window_size, statistics, terget_name
 
     result = timeseries.copy()
     for i in range(1, window_size + 1):
-        result[f'lag_{i}'] = result.rolling(window_size).statistics
+        # TODO apply different finction for rolling window df
+        #result[f'lag_{i}'] = result.rolling(window_size).statistics
+        continue
     return result
