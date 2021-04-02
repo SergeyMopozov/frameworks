@@ -14,42 +14,61 @@ Multitimeseries data is an independent timeseries that represent similar process
     5. External libraries for feature generation
 '''
 
+import pandas as pd
 
-def generate_lags(timeseries, window_size, terget_name=None):
+def generate_lags(timeseries, window_size=1):
     '''
     Function get univariate timeseries dataframe on input and return new dataframes with lagged feature
     :type window_size: int
     :type timeseries: pandas.DataFrame
     '''
 
-    result = timeseries.copy()
+    result = pd.DataFrametime(index=timeseries.index)
     for i in range(1, window_size + 1):
-        result[f'lag_{i}'] = result.shift(i)
+        result[f'lag_{i}'] = timeseries.shift(i)
     return result
 
 
-def generate_diffs(timeseries, window_size, terget_name=None):
+def generate_diffs(timeseries, window_size=1):
     '''
     Function get univariate timeseries dataframe on input and return new dataframes with difference feature
     :type window_size: int
     :type timeseries: pandas.DataFrame
+    :return: new dataframe
     '''
 
-    result = timeseries.copy()
+    result = pd.DataFrametime(index=timeseries.index)
     for i in range(1, window_size + 1):
-        result[f'lag_{i}'] = result.diff(i)
+        result[f'diff_{i}'] = timeseries.diff(i)
     return result
 
-def generate_rolling_statistics(timeseries, window_size, statistics, terget_name=None):
+def generate_rolwin_stat(timeseries, window_sizes, shifts=[1], statistics='mean'):
+    '''
+    Function get univariate timeseries dataframe on input and return new dataframes with rolling statistic feature
+    :type window_sizes: list
+    :type timeseries: pandas.DataFrame
+    :return: new dataframe
+    '''
+
+    result = pd.DataFrametime(index=timeseries.index)
+    for w in window_sizes:
+        for s in shifts:
+            result[f'roll_{w}_{statistics}'] = timeseries.shift(s).rolling(w).agg(statistics)
+
+    return result
+
+def generate_expwin_stat(timeseries, window_sizes, shifts=[1], statistics='mean'):
     '''
     Function get univariate timeseries dataframe on input and return new dataframes with rolling statistic feature
     :type window_size: int
     :type timeseries: pandas.DataFrame
+    :return: new dataframe
     '''
 
-    result = timeseries.copy()
-    for i in range(1, window_size + 1):
-        # TODO apply different finction for rolling window df
-        #result[f'lag_{i}'] = result.rolling(window_size).statistics
-        continue
+    result = pd.DataFrametime(index=timeseries.index)
+    for w in window_sizes:
+        for s in shifts:
+            result[f'exp_{w}_{statistics}'] = timeseries.shift(s).expanding(w).agg(statistics)
+
     return result
+

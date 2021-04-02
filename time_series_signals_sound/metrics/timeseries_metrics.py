@@ -55,7 +55,7 @@ def resampled_error(y_true, y_pred, new_freq, error):
     '''
     y_pred = pd.Series(y_pred, index=y_true.index)
     y_pred_new = y_pred.resample(new_freq).sum()
-    y_true_new = y_pred.resample(new_freq).sum()
+    y_true_new = y_true.resample(new_freq).sum()
 
     return error(y_true_new, y_pred_new)
 
