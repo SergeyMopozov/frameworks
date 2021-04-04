@@ -1,4 +1,4 @@
-'''
+"""
 Multi-step prediction approaches
 Direct Multi-step Forecast Strategy The direct method involves developing a separate model for each forecast time step.
 
@@ -27,19 +27,19 @@ the entire forecast sequence in a one-shot manner.
 Example:
 
 prediction(t+1), prediction(t+2) = model(obs(t-1), obs(t-2), ..., obs(t-n))
-'''
+"""
 
 from ..preprocessing import feature_generation
 
 
 # direct strategy
 def direct_forecast(model, data, predicted_steps=1):
-    '''
+    """
     :param model: class of the ML model
-    :param data: row data - univariate time series
+    :param data: row data - unvaried time series
     :param predicted_steps: number of predicted steps
     :return: fitted model, forecasts
-    '''
+    """
 
     # 1 prepare data
     targets = {}
@@ -68,24 +68,24 @@ def direct_forecast(model, data, predicted_steps=1):
 
 # recursive strategy
 def recursive_forecast(model, data, predicted_steps=1):
-    '''
+    """
     :param model: class of the ML model
-    :param data: row data - univariate time series
+    :param data: row data - unvaried time series
     :param predicted_steps: number of predicted steps
     :return: fitted model, forecasts
-    '''
+    """
 
-    #1 prepare data
+    # 1 prepare data
     targets = data.shift(-1)
     features = feature_generation.generate_lags(data)
 
-    #2 fit model
+    # 2 fit model
     model.fit(features, targets)
 
-    #3 forecast
+    # 3 forecast
     forecast = {}
-    #all models predict on last observation
 
+    # all models predict on last observation
     for i in range(predicted_steps):
 
         future_features = feature_generation.generate_lags(data).iloc[-1:]

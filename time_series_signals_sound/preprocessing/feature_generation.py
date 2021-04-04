@@ -15,6 +15,7 @@ Multitimeseries data is an independent timeseries that represent similar process
 '''
 
 import pandas as pd
+import numpy as np
 
 def generate_lags(timeseries, window_size=1):
     '''
@@ -57,6 +58,7 @@ def generate_rolwin_stat(timeseries, window_sizes, shifts=[1], statistics='mean'
 
     return result
 
+
 def generate_expwin_stat(timeseries, window_sizes, shifts=[1], statistics='mean'):
     '''
     Function get univariate timeseries dataframe on input and return new dataframes with rolling statistic feature
@@ -70,5 +72,29 @@ def generate_expwin_stat(timeseries, window_sizes, shifts=[1], statistics='mean'
         for s in shifts:
             result[f'exp_{w}_{statistics}'] = timeseries.shift(s).expanding(w).agg(statistics)
 
+    return result
+
+
+def generate_trend(timeseries, linear=True, quadratic=False, exp=False, log=False,  logit=False):
+    """
+
+    :param timeseries:
+    :param linear:
+    :param quadratic:
+    :param exp:
+    :param logit:
+    :param log:
+    :return:
+    """
+    result = pd.DataFrametime(index=timeseries.index)
+    if linear:
+        result['linear_trend'] = np.arange(len(timeseries))
+    if quadratic:
+        result['quadratic_trend'] = np.square(np.arange(len(timeseries)))
+    if exp:
+        result['quadratic_trend'] = np.exp(np.arange(len(timeseries)))
+    if log:
+        result['quadratic_trend'] = np.log1p(np.arange(len(timeseries)))
+    # TODO add code for logit calculate
     return result
 
