@@ -98,3 +98,48 @@ def generate_trend(timeseries, linear=True, quadratic=False, exp=False, log=Fals
     # TODO add code for logit calculate
     return result
 
+
+def generaete_seasonality(timeseries, n, freq='H', yearly=False, monthly=False, weekly=False, dayly=False):
+    """
+
+    :param timeseries:
+    :param n - number of Fouirie transformations
+    :param freq:
+    :param yearly:
+    :param monthly:
+    :param weekly:
+    :param dayly:
+    :return:
+    """
+
+    result = pd.DataFrametime(index=timeseries.index)
+    if freq == 'H':
+        week_period = 7 * 24
+        month_period = 30.5*24
+        year_period = 365.25 * 24
+
+    if freq == 'D':
+        week_period = 7
+        month_period = 30.5
+        year_period = 365.25
+
+    # features for weekly seasonality
+    if weekly:
+        for K in range(1, n):
+            result['sin_week_season_' + str(K)] = np.sin(np.arange(len(timeseries)) * 2 * np.pi * K / week_period)
+            result['cos_week_season_' + str(K)] = np.cos(np.arange(len(timeseries))* 2 * np.pi * K / week_period)
+
+    # features for monthly seasonality
+    if weekly:
+        for K in range(1, n):
+            result['sin_month_season_' + str(K)] = np.sin(np.arange(len(timeseries)) * 2 * np.pi * K / month_period)
+            result['cos_month_season_' + str(K)] = np.cos(np.arange(len(timeseries))* 2 * np.pi * K / month_period)
+
+    # features for yearly seasonality
+    if yearly:
+        for K in range(1, n):
+            result['sin_year_season_' + str(K)] = np.sin(np.arange(len(timeseries)) * 2 * np.pi * K / year_period)
+            result['cos_year_season_' + str(K)] = np.cos(np.arange(len(timeseries)) * 2 * np.pi * K / year_period)
+
+    return result
+
