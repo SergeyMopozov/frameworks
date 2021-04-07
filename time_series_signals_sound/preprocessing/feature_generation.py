@@ -103,7 +103,7 @@ def generaete_seasonality(timeseries, n, freq='H', yearly=False, monthly=False, 
     """
 
     :param timeseries:
-    :param n - number of Fouirie transformations
+    :param n - Fouirie order
     :param freq:
     :param yearly:
     :param monthly:
