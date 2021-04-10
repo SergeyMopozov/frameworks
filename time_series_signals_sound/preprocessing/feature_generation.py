@@ -17,6 +17,7 @@ Multitimeseries data is an independent timeseries that represent similar process
 import pandas as pd
 import numpy as np
 
+
 def generate_lags(timeseries, window_size=1):
     '''
     Function get univariate timeseries dataframe on input and return new dataframes with lagged feature
@@ -43,6 +44,7 @@ def generate_diffs(timeseries, window_size=1):
         result[f'diff_{i}'] = timeseries.diff(i)
     return result
 
+
 def generate_rolwin_stat(timeseries, window_sizes, shifts=[1], statistics='mean'):
     '''
     Function get univariate timeseries dataframe on input and return new dataframes with rolling statistic feature
@@ -62,7 +64,9 @@ def generate_rolwin_stat(timeseries, window_sizes, shifts=[1], statistics='mean'
 def generate_expwin_stat(timeseries, window_sizes, shifts=[1], statistics='mean'):
     '''
     Function get univariate timeseries dataframe on input and return new dataframes with rolling statistic feature
-    :type window_size: int
+    :param shifts:
+    :param statistics:
+    :type window_sizes: int
     :type timeseries: pandas.DataFrame
     :return: new dataframe
     '''
@@ -130,7 +134,7 @@ def generaete_seasonality(timeseries, n, freq='H', yearly=False, monthly=False, 
             result['cos_week_season_' + str(K)] = np.cos(np.arange(len(timeseries))* 2 * np.pi * K / week_period)
 
     # features for monthly seasonality
-    if weekly:
+    if monthly:
         for K in range(1, n):
             result['sin_month_season_' + str(K)] = np.sin(np.arange(len(timeseries)) * 2 * np.pi * K / month_period)
             result['cos_month_season_' + str(K)] = np.cos(np.arange(len(timeseries))* 2 * np.pi * K / month_period)

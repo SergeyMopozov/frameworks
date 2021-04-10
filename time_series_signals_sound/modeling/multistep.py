@@ -32,8 +32,8 @@ prediction(t+1), prediction(t+2) = model(obs(t-1), obs(t-2), ..., obs(t-n))
 from ..preprocessing import feature_generation
 
 
-# direct strategy
-def direct_forecast(model, data, predicted_steps=1):
+
+def direct_forecast_feature(data, predicted_steps=1):
     """
     :param model: class of the ML model
     :param data: row data - unvaried time series
@@ -48,48 +48,60 @@ def direct_forecast(model, data, predicted_steps=1):
         targets[i] = data.shift(i * (-1))
         features[i] = feature_generation.generate_lags(data.shift(i-1))
 
-    # 2 fit model
-    models = {}
-    for i in range(1, predicted_steps + 1):
-        # TODO how to implement different models
-        m = model
-        m.fit(features[i], targets[i])
-        models[i] = m
+    return features, targets
 
-    # 3 forecast
-    forecast = {}
-    # all models predict on last observation
-    future_features = feature_generation.generate_lags(data).iloc[-1:]
-    for key in models.keys():
-        forecast[key] = models[key].predict(future_features)
 
-    return models, forecast
+# direct strategy
+class DirectForecast:
+    def __init__(self, model, steps=1):
+
+        self.models = []
+        self.steps = steps
+        for i in self.steps:
+            self.models.append(model)
+
+    def fit(self, X_train, y_train):
+        for m in self.models:
+            m.fit(X_train, y_train)
+
+    def predict(self, X_future):
+        forecast = []
+        for m in self.models:
+            forecast.append(m.predict(X_future))
+
+        return forecast
 
 
 # recursive strategy
-def recursive_forecast(model, data, predicted_steps=1):
-    """
-    :param model: class of the ML model
-    :param data: row data - unvaried time series
-    :param predicted_steps: number of predicted steps
-    :return: fitted model, forecasts
-    """
+class RecursiveForecast:
+    def __init__(self, model, feature_generator, steps=1):
+        self.model = model
+        self.feature_generator = feature_generator
+        self.steps = steps
 
-    # 1 prepare data
-    targets = data.shift(-1)
-    features = feature_generation.generate_lags(data)
+    def fit(self, series):
+        X_train = self.feature_generator(series)
+        y_train = series
+        self.model.fit(X_train, y_train)
 
-    # 2 fit model
-    model.fit(features, targets)
+    def predict(self, series):
+        #TODO  for predictin need recalculate features frame for next prediction
+        # think about how optimize this process
+        forecast = []
+        for i in range(self.steps):
+            if i == 0:
+                features = self.feature_generator(series)
+                forecast.append(self.model.predict(features[-1]))
+            else:
+                # 1 add previous forecasted value
+                series.append(forecast[i - 1])
+                # 2 recalculate features
+                features = self.feature_generator(series)
+                # 3 predict
+                forecast.append(self.model.predict(features[-1]))
 
-    # 3 forecast
-    forecast = {}
 
-    # all models predict on last observation
-    for i in range(predicted_steps):
 
-        future_features = feature_generation.generate_lags(data).iloc[-1:]
-        forecast[i] = model.predict(future_features)
-        data = data.append(forecast[i])
 
-    return model, forecast
+
+

@@ -1,14 +1,43 @@
-'''
+"""
 
 # Timeseries modeling
-Modeling is a process that contain creating and fitting model, that could be use for explain observation, forecasting future values, classification etc. Here we discuss next topics:
+Modeling is a process that contain creating and fitting model, that could be use for explain observation,
+forecasting future values, classification etc. Here we discuss next topics:
 
-1. Modeling aproaches for 1 step forecast
-2. Modeling aproaches for multisteps short-term forcasting
-3. Modeling aproaches for multisteps long-term forcasting
+1. Modeling approaches for 1 step forecast
+2. Modeling approaches for multisteps short-term forcasting
+3. Modeling approaches for multisteps long-term forcasting
 4. External libraries Prophet, Orbit, Darts
 
-'''
+"""
+import numpy as np
+
+
+def baseline_forecast(series, steps=1, ftype='last', period=1, season=7, n_seasons=1, recursive=False):
+    """
+
+    :param recursive:
+    :param n_seasons:
+    :param season:
+    :param period:
+    :param ftype: 'last', 'mean', 'season mean'
+    :param series:
+    :param steps:
+    :return:
+    """
+    series = np.array(series)
+    if ftype == 'last':
+        return [series[-1] for _ in range(steps)]
+
+    if ftype == 'mean':
+        return [np.mean(series[-period:]) for _ in range(steps)]
+
+    if ftype == 'season mean':
+        forecast = []
+        for step in range(steps):
+            forecast.append(np.mean([series[-(season * (n + 1)) + step % season] for n in range(n_seasons)]))
+        return forecast
+
 
 
 # def optimizeSARIMA(parameters_list, d, D, s, endog, exog=None):
