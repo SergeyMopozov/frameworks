@@ -42,7 +42,7 @@ def baseline_forecast(series, steps=1, ftype='last', period=1, season=7, n_seaso
         forecast = []
         for step in range(steps):
             forecast.append(np.mean([series[-(season * (n + 1)) + step % season] for n in range(n_seasons)]))
-            forecast = pd.Series(forecast, index=forecast_index)
+        forecast = pd.Series(forecast, index=forecast_index)
         return forecast
 
 
