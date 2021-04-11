@@ -11,9 +11,10 @@ forecasting future values, classification etc. Here we discuss next topics:
 
 """
 import numpy as np
+import pandas as pd
 
 
-def baseline_forecast(series, steps=1, ftype='last', period=1, season=7, n_seasons=1, recursive=False):
+def baseline_forecast(series, steps=1, ftype='last', period=1, season=7, n_seasons=1, freq='D', recursive=False):
     """
 
     :param recursive:
@@ -25,17 +26,23 @@ def baseline_forecast(series, steps=1, ftype='last', period=1, season=7, n_seaso
     :param steps:
     :return:
     """
+    forecast_index = pd.date_range(start=series.index[-1], periods=steps+1, freq=freq)[1:]
     series = np.array(series)
     if ftype == 'last':
-        return [series[-1] for _ in range(steps)]
+        forecast = [series[-1] for _ in range(steps)]
+        forecast = pd.Series(forecast, index=forecast_index)
+        return forecast
 
     if ftype == 'mean':
-        return [np.mean(series[-period:]) for _ in range(steps)]
+        forecast = [np.mean(series[-period:]) for _ in range(steps)]
+        forecast = pd.Series(forecast, index=forecast_index)
+        return forecast
 
     if ftype == 'season mean':
         forecast = []
         for step in range(steps):
             forecast.append(np.mean([series[-(season * (n + 1)) + step % season] for n in range(n_seasons)]))
+            forecast = pd.Series(forecast, index=forecast_index)
         return forecast
 
 
