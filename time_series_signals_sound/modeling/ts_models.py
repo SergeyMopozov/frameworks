@@ -14,9 +14,21 @@ import numpy as np
 import pandas as pd
 
 
-def baseline_forecast(series, steps=1, ftype='last', period=1, season=7, n_seasons=1, freq='D', recursive=False):
+def baseline_forecast(series,
+                      steps=1,
+                      ftype='last',
+                      period=1,
+                      season=7,
+                      n_seasons=1,
+                      time_index=True,
+                      freq='D',
+                      index=[],
+                      recursive=False):
     """
 
+    :param index:
+    :param freq:
+    :param time_index:
     :param recursive:
     :param n_seasons:
     :param season:
@@ -26,7 +38,10 @@ def baseline_forecast(series, steps=1, ftype='last', period=1, season=7, n_seaso
     :param steps:
     :return:
     """
-    forecast_index = pd.date_range(start=series.index[-1], periods=steps+1, freq=freq)[1:]
+    if time_index:
+        forecast_index = pd.date_range(start=series.index[-1], periods=steps+1, freq=freq)[1:]
+    else:
+        forecast_index = index
     series = np.array(series)
     if ftype == 'last':
         forecast = [series[-1] for _ in range(steps)]

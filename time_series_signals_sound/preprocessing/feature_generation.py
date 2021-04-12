@@ -25,9 +25,9 @@ def generate_lags(timeseries, window_size=1):
     :type timeseries: pandas.DataFrame
     '''
 
-    result = pd.DataFrametime(index=timeseries.index)
-    for i in range(1, window_size + 1):
-        result[f'lag_{i}'] = timeseries.shift(i)
+    result = pd.DataFrame(index=timeseries.index)
+    for i in range(0, window_size):
+        result[f'lag_{i+1}'] = timeseries.shift(i)
     return result
 
 
@@ -39,9 +39,9 @@ def generate_diffs(timeseries, window_size=1):
     :return: new dataframe
     '''
 
-    result = pd.DataFrametime(index=timeseries.index)
-    for i in range(1, window_size + 1):
-        result[f'diff_{i}'] = timeseries.diff(i)
+    result = pd.DataFrame(index=timeseries.index)
+    for i in range(0, window_size):
+        result[f'diff_{i+1}'] = timeseries.diff(i)
     return result
 
 
@@ -71,7 +71,7 @@ def generate_expwin_stat(timeseries, window_sizes, shifts=[1], statistics='mean'
     :return: new dataframe
     '''
 
-    result = pd.DataFrametime(index=timeseries.index)
+    result = pd.DataFrame(index=timeseries.index)
     for w in window_sizes:
         for s in shifts:
             result[f'exp_{w}_{statistics}'] = timeseries.shift(s).expanding(w).agg(statistics)
@@ -90,7 +90,7 @@ def generate_trend(timeseries, linear=True, quadratic=False, exp=False, log=Fals
     :param log:
     :return:
     """
-    result = pd.DataFrametime(index=timeseries.index)
+    result = pd.DataFrame(index=timeseries.index)
     if linear:
         result['linear_trend'] = np.arange(len(timeseries))
     if quadratic:
@@ -116,7 +116,7 @@ def generaete_seasonality(timeseries, n, freq='H', yearly=False, monthly=False, 
     :return:
     """
 
-    result = pd.DataFrametime(index=timeseries.index)
+    result = pd.DataFrame(index=timeseries.index)
     if freq == 'H':
         week_period = 7 * 24
         month_period = 30.5*24
@@ -146,4 +146,22 @@ def generaete_seasonality(timeseries, n, freq='H', yearly=False, monthly=False, 
             result['cos_year_season_' + str(K)] = np.cos(np.arange(len(timeseries)) * 2 * np.pi * K / year_period)
 
     return result
+
+
+def direct_forecast_feature(data, target, steps=1):
+    """
+    :param target:  name of target columns
+    :param data: row data - unvaried time series pandas
+    :param steps: number of predicted steps
+    :return: fitted model, forecasts
+    """
+
+    targets = {}
+    features = {}
+    for i in range(1, steps + 1):
+        targets[i] = data[target].shift(i * (-1)).dropna()
+        features[i] = data.loc[targets[i].index]
+
+    return features, targets
+
 

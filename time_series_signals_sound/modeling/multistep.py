@@ -29,45 +29,27 @@ Example:
 prediction(t+1), prediction(t+2) = model(obs(t-1), obs(t-2), ..., obs(t-n))
 """
 
-from ..preprocessing import feature_generation
-
-
-
-def direct_forecast_feature(data, predicted_steps=1):
-    """
-    :param model: class of the ML model
-    :param data: row data - unvaried time series
-    :param predicted_steps: number of predicted steps
-    :return: fitted model, forecasts
-    """
-
-    # 1 prepare data
-    targets = {}
-    features = {}
-    for i in range(1, predicted_steps + 1):
-        targets[i] = data.shift(i * (-1))
-        features[i] = feature_generation.generate_lags(data.shift(i-1))
-
-    return features, targets
-
 
 # direct strategy
 class DirectForecast:
+    # TODO add score models on train data
     def __init__(self, model, steps=1):
 
         self.models = []
         self.steps = steps
-        for i in self.steps:
-            self.models.append(model)
+        for i in range(self.steps):
+            self.models.append(model())
 
-    def fit(self, X_train, y_train):
-        for m in self.models:
-            m.fit(X_train, y_train)
+    def fit(self, features, targets):
+
+        for i, m in enumerate(self.models, 1):
+            m.fit(features[i], targets[i])
 
     def predict(self, X_future):
+        # X_future last observe of values
         forecast = []
         for m in self.models:
-            forecast.append(m.predict(X_future))
+            forecast.append(m.predict(X_future)[0])
 
         return forecast
 
@@ -85,7 +67,7 @@ class RecursiveForecast:
         self.model.fit(X_train, y_train)
 
     def predict(self, series):
-        #TODO  for predictin need recalculate features frame for next prediction
+        # TODO  for prediction need recalculate features frame for next prediction
         # think about how optimize this process
         forecast = []
         for i in range(self.steps):
@@ -99,9 +81,3 @@ class RecursiveForecast:
                 features = self.feature_generator(series)
                 # 3 predict
                 forecast.append(self.model.predict(features[-1]))
-
-
-
-
-
-
