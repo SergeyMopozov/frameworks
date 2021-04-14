@@ -153,7 +153,7 @@ def direct_forecast_feature(data, target, steps=1):
     :param target:  name of target columns
     :param data: row data - unvaried time series pandas
     :param steps: number of predicted steps
-    :return: fitted model, forecasts
+    :return: features dict, targets dict
     """
 
     targets = {}
@@ -165,3 +165,17 @@ def direct_forecast_feature(data, target, steps=1):
     return features, targets
 
 
+def future_endog_feature(data, new_observation):
+    """
+    function generate endogenous features with new observation
+    lags - add new observation and shift new series
+    diff - same as a lags, but diff new series
+    trend - add 1 for each observations and recalculate non-linear trends
+    seasons - same as trends
+    rolling statistics
+    :param data:
+    :param new_observation:
+    :return:
+    """
+
+    return None
