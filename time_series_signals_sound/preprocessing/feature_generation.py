@@ -179,3 +179,17 @@ def future_endog_feature(data, new_observation):
     """
 
     return None
+
+
+def add_future(timeseries, steps=1, freq='D'):
+    """
+
+    :param timeseries:
+    :param steps:
+    :param freq:
+    :return:
+    """
+    future_idx = pd.date_range(timeseries.index[-1], periods=steps, freq=freq)
+    future = pd.DataFrame(columns=timeseries.columns, index=future_idx)
+    return pd.concat([timeseries, future])
+
