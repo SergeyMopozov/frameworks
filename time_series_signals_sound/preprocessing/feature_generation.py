@@ -189,7 +189,26 @@ def add_future(timeseries, steps=1, freq='D'):
     :param freq:
     :return:
     """
-    future_idx = pd.date_range(timeseries.index[-1], periods=steps, freq=freq)
+    future_idx = pd.date_range(timeseries.index[-1], periods=steps+1, freq=freq)[1:]
     future = pd.DataFrame(columns=timeseries.columns, index=future_idx)
     return pd.concat([timeseries, future])
 
+
+def code_mean(data, cat_features, real_feature):
+    """
+    Returns a dictionary where keys are unique categories of the cat_feature,
+    and values are means over real_feature
+
+    :param data:
+    :param cat_features:
+    :param real_feature:
+    """
+    return dict(data.groupby(cat_features)[real_feature].mean())
+
+
+def get_code_mean(data, target, category_list, test_size):
+    test_index = int(len(data.dropna())*(1-test_size))
+    for cat in category_list:
+        data['average' + f'_{cat}'] = list(map(code_mean(data[:test_index], cat, target).get,
+                                               zip(data['id'], data[cat])))
+    return data
