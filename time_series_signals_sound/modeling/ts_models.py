@@ -5,8 +5,8 @@ Modeling is a process that contain creating and fitting model, that could be use
 forecasting future values, classification etc. Here we discuss next topics:
 
 1. Modeling approaches for 1 step forecast
-2. Modeling approaches for multisteps short-term forcasting
-3. Modeling approaches for multisteps long-term forcasting
+2. Modeling approaches for multisteps short-term forecasting
+3. Modeling approaches for multisteps long-term forecasting
 4. External libraries Prophet, Orbit, Darts
 
 """
