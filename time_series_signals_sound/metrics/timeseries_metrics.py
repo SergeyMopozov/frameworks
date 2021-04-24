@@ -121,7 +121,7 @@ def timeseriesCVscore(series, model, loss_function, n_splits=3):
         model.fit(values[train])
         predictions = model.predict(steps=len(test))
         actual = values[test]
-        error = loss_function(predictions, actual)
+        error = loss_function(actual, predictions)
         errors.append(error)
 
     return np.mean(np.array(errors))

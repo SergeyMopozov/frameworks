@@ -181,17 +181,42 @@ def future_endog_feature(data, new_observation):
     return None
 
 
-def add_future(timeseries, steps=1, freq='D'):
+def get_future_ts(timeseries, steps=1, freq='D'):
     """
-
+    add future to one ts or for multiple ts in pivot format (time by rows)
     :param timeseries:
     :param steps:
     :param freq:
     :return:
     """
     future_idx = pd.date_range(timeseries.index[-1], periods=steps+1, freq=freq)[1:]
-    future = pd.DataFrame(columns=timeseries.columns, index=future_idx)
-    return pd.concat([timeseries, future])
+    future_df = pd.DataFrame(columns=timeseries.columns, index=future_idx)
+    return future_df
+
+
+def get_future_mts(train_df, index_columns, target, time_index, start, end, freq='H'):
+    """
+    add future for multiple time series in melting format
+    :param train_df:
+    :param index_columns:
+    :param target:
+    :param time_index:
+    :param start:
+    :param end:
+    :param freq:
+    :return:
+    """
+    future_df = pd.DataFrame()
+    for i in pd.date_range(start=start, end=end, freq=freq):
+        temp_df = train_df[index_columns]
+        temp_df = temp_df.drop_duplicates()
+
+        temp_df[time_index] = i
+
+        temp_df[target] = np.nan
+        future_df = pd.concat([future_df, temp_df])
+
+    return future_df
 
 
 def code_mean(data, cat_features, real_feature):
