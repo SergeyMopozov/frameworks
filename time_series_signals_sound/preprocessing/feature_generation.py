@@ -79,28 +79,23 @@ def generate_expwin_stat(timeseries, window_sizes, shifts=[1], statistics='mean'
     return result
 
 
-def generate_trend(timeseries, linear=True, quadratic=False, exp=False, log=False,  logit=False):
+def generate_trend(timeseries, kind='linear'):
     """
 
+    :param kind:
     :param timeseries:
-    :param linear:
-    :param quadratic:
-    :param exp:
-    :param logit:
-    :param log:
     :return:
     """
-    result = pd.DataFrame(index=timeseries.index)
-    if linear:
-        result['linear_trend'] = np.arange(len(timeseries))
-    if quadratic:
-        result['quadratic_trend'] = np.square(np.arange(len(timeseries)))
-    if exp:
-        result['quadratic_trend'] = np.exp(np.arange(len(timeseries)))
-    if log:
-        result['quadratic_trend'] = np.log1p(np.arange(len(timeseries)))
-    # TODO add code for logit calculate
-    return result
+    if kind == 'linear':
+        return np.arange(len(timeseries))
+    if kind == 'quadratic':
+        return np.square(np.arange(len(timeseries)))
+    if kind == 'exp':
+        return np.exp(np.arange(len(timeseries)))
+    if kind =='log':
+        return np.log1p(np.arange(len(timeseries)))
+    # TODO add code for logit and Gomertz trend
+
 
 
 def generaete_seasonality(timeseries, n, freq='H', yearly=False, monthly=False, weekly=False, dayly=False):
@@ -130,20 +125,20 @@ def generaete_seasonality(timeseries, n, freq='H', yearly=False, monthly=False, 
     # features for weekly seasonality
     if weekly:
         for K in range(1, n):
-            result['sin_week_season_' + str(K)] = np.sin(np.arange(len(timeseries)) * 2 * np.pi * K / week_period)
-            result['cos_week_season_' + str(K)] = np.cos(np.arange(len(timeseries))* 2 * np.pi * K / week_period)
+            result[f'sin_week_season_{K}'] = np.sin(np.arange(len(timeseries)) * 2 * np.pi * K / week_period)
+            result[f'cos_week_season_{K}'] = np.cos(np.arange(len(timeseries))* 2 * np.pi * K / week_period)
 
     # features for monthly seasonality
     if monthly:
         for K in range(1, n):
-            result['sin_month_season_' + str(K)] = np.sin(np.arange(len(timeseries)) * 2 * np.pi * K / month_period)
-            result['cos_month_season_' + str(K)] = np.cos(np.arange(len(timeseries))* 2 * np.pi * K / month_period)
+            result[f'sin_month_season_{K}'] = np.sin(np.arange(len(timeseries)) * 2 * np.pi * K / month_period)
+            result[f'cos_month_season_{K}'] = np.cos(np.arange(len(timeseries))* 2 * np.pi * K / month_period)
 
     # features for yearly seasonality
     if yearly:
         for K in range(1, n):
-            result['sin_year_season_' + str(K)] = np.sin(np.arange(len(timeseries)) * 2 * np.pi * K / year_period)
-            result['cos_year_season_' + str(K)] = np.cos(np.arange(len(timeseries)) * 2 * np.pi * K / year_period)
+            result[f'sin_year_season_{K}'] = np.sin(np.arange(len(timeseries)) * 2 * np.pi * K / year_period)
+            result[f'cos_year_season_{K}'] = np.cos(np.arange(len(timeseries)) * 2 * np.pi * K / year_period)
 
     return result
 
@@ -231,9 +226,16 @@ def code_mean(data, cat_features, real_feature):
     return dict(data.groupby(cat_features)[real_feature].mean())
 
 
-def get_code_mean(data, target, category_list, test_size):
-    test_index = int(len(data.dropna())*(1-test_size))
+def get_code_mean(data, target, category_list):
+    """
+    only for single timeseries
+    :param data:
+    :param target:
+    :param category_list:
+    :param test_size:
+    :return:
+    """
+
     for cat in category_list:
-        data['average' + f'_{cat}'] = list(map(code_mean(data[:test_index], cat, target).get,
-                                               zip(data['id'], data[cat])))
+        data['average' + f'_{cat}'] = list(map(code_mean(data, cat, target).get, data[cat]))
     return data
