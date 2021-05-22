@@ -26,22 +26,20 @@ def create_col_with_min_freq(data, col, min_freq=10):
     data.replace({'nan': np.nan}, inplace=True)
 
 
-def create_gr_feats(data, cat_feats, num_feats, min_freq):
+def create_gr_feats(data, cat_feats, num_feats):
     """
     create aggregation feats for numeric features based on categorical ones and count its
     :param num_feats:
     :param cat_feats:
-    :param min_freq:
     :param data:
     :return:
     """
     # create aggregation feats for numeric features based on categorical ones
     for cat_col in cat_feats:
-        create_col_with_min_freq(data, cat_col, min_freq)
         for num_col in num_feats:
             for n, f in [('mean', np.mean), ('min', np.nanmin), ('max', np.nanmax), ('std', np.nanstd)]:
                 data['FIXED_' + n + '_' + num_col + '_by_' + cat_col] = \
-                    data.groupby(cat_col + '_fixed')[num_col].transform(f)
+                    data.groupby(cat_col)[num_col].transform(f)
 
     # create features with counts
     for col in cat_feats:
