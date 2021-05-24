@@ -1,4 +1,6 @@
+import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.metrics import confusion_matrix, accuracy_score, classification_report, plot_confusion_matrix, f1_score
 from sklearn.metrics import roc_auc_score, roc_curve
 
@@ -46,3 +48,13 @@ def classification_scorer(model, X_valid, y_valid):
     plot_confusion_matrix(model, X_valid, y_valid)
     plt.show()
     print(classification_report(y_valid, model.predict(X_valid)))
+
+
+def confusion_matrix_plot(y_valid, y_pred, class_names):
+    conf_mat = pd.DataFrame(confusion_matrix(y_valid, y_pred), index=class_names,
+                            columns=class_names)
+
+    conf_mat = conf_mat.div(conf_mat.sum(axis=1), axis=0)
+    plt.figure(figsize=(12, 12))
+    sns.heatmap(conf_mat, annot=True)
+    plt.show()
