@@ -26,8 +26,8 @@ def generate_lags(timeseries, window_size=1):
     '''
 
     result = pd.DataFrame(index=timeseries.index)
-    for i in range(0, window_size):
-        result[f'lag_{i+1}'] = timeseries.shift(i)
+    for i in range(1, window_size+1):
+        result[f'lag_{i}'] = timeseries.shift(i)
     return result
 
 
@@ -40,8 +40,8 @@ def generate_diffs(timeseries, window_size=1):
     '''
 
     result = pd.DataFrame(index=timeseries.index)
-    for i in range(0, window_size):
-        result[f'diff_{i+1}'] = timeseries.diff(i)
+    for i in range(1, window_size+1):
+        result[f'diff_{i}'] = timeseries.diff(i)
     return result
 
 
@@ -87,18 +87,17 @@ def generate_trend(timeseries, kind='linear'):
     :return:
     """
     if kind == 'linear':
-        return np.arange(len(timeseries))
+        return pd.Series(np.arange(len(timeseries)), index=timeseries.index)
     if kind == 'quadratic':
-        return np.square(np.arange(len(timeseries)))
+        return pd.Series(np.square(np.arange(len(timeseries))), index=timeseries.index)
     if kind == 'exp':
-        return np.exp(np.arange(len(timeseries)))
-    if kind =='log':
-        return np.log1p(np.arange(len(timeseries)))
+        return pd.Series(np.exp(np.arange(len(timeseries))), index=timeseries.index)
+    if kind == 'log':
+        return pd.Series(np.log1p(np.arange(len(timeseries))), index=timeseries.index)
     # TODO add code for logit and Gomertz trend
 
 
-
-def generaete_seasonality(timeseries, n, freq='H', yearly=False, monthly=False, weekly=False, dayly=False):
+def generaete_seasonality(timeseries, n, freq='H', yearly=False, monthly=False, weekly=False, daily=False):
     """
 
     :param timeseries:
@@ -113,8 +112,9 @@ def generaete_seasonality(timeseries, n, freq='H', yearly=False, monthly=False, 
 
     result = pd.DataFrame(index=timeseries.index)
     if freq == 'H':
+        daily_period = 24
         week_period = 7 * 24
-        month_period = 30.5*24
+        month_period = 30.5 * 24
         year_period = 365.25 * 24
 
     if freq == 'D':
@@ -123,16 +123,22 @@ def generaete_seasonality(timeseries, n, freq='H', yearly=False, monthly=False, 
         year_period = 365.25
 
     # features for weekly seasonality
+    if daily and freq == 'H':
+        for K in range(1, n):
+            result[f'sin_week_season_{K}'] = np.sin(np.arange(len(timeseries)) * 2 * np.pi * K / daily_period)
+            result[f'cos_week_season_{K}'] = np.cos(np.arange(len(timeseries)) * 2 * np.pi * K / daily_period)
+
+    # features for weekly seasonality
     if weekly:
         for K in range(1, n):
             result[f'sin_week_season_{K}'] = np.sin(np.arange(len(timeseries)) * 2 * np.pi * K / week_period)
-            result[f'cos_week_season_{K}'] = np.cos(np.arange(len(timeseries))* 2 * np.pi * K / week_period)
+            result[f'cos_week_season_{K}'] = np.cos(np.arange(len(timeseries)) * 2 * np.pi * K / week_period)
 
     # features for monthly seasonality
     if monthly:
         for K in range(1, n):
             result[f'sin_month_season_{K}'] = np.sin(np.arange(len(timeseries)) * 2 * np.pi * K / month_period)
-            result[f'cos_month_season_{K}'] = np.cos(np.arange(len(timeseries))* 2 * np.pi * K / month_period)
+            result[f'cos_month_season_{K}'] = np.cos(np.arange(len(timeseries)) * 2 * np.pi * K / month_period)
 
     # features for yearly seasonality
     if yearly:
@@ -153,9 +159,9 @@ def direct_forecast_feature(data, target, steps=1):
 
     targets = {}
     features = {}
-    for i in range(1, steps + 1):
-        targets[i] = data[target].shift(i * (-1)).dropna()
-        features[i] = data.loc[targets[i].index]
+    for i in range(0, steps):
+        targets[i+1] = data[target].shift(i * (-1)).dropna()
+        features[i+1] = data.loc[targets[i+1].index]
 
     return features, targets
 
@@ -184,7 +190,7 @@ def get_future_ts(timeseries, steps=1, freq='D'):
     :param freq:
     :return:
     """
-    future_idx = pd.date_range(timeseries.index[-1], periods=steps+1, freq=freq)[1:]
+    future_idx = pd.date_range(timeseries.index[-1], periods=steps + 1, freq=freq)[1:]
     future_df = pd.DataFrame(columns=timeseries.columns, index=future_idx)
     return future_df
 
