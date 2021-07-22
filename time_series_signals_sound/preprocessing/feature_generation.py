@@ -18,36 +18,40 @@ import pandas as pd
 import numpy as np
 
 
-def generate_lags(timeseries, window_size=1):
+def generate_lags(timeseries, lags=[1]):
     '''
     Function get univariate timeseries dataframe on input and return new dataframes with lagged feature
-    :type window_size: int
+    :param lags:
     :type timeseries: pandas.DataFrame
     '''
 
     result = pd.DataFrame(index=timeseries.index)
-    for i in range(1, window_size+1):
+    for i in lags:
         result[f'lag_{i}'] = timeseries.shift(i)
     return result
 
 
-def generate_diffs(timeseries, window_size=1):
+def generate_diffs(timeseries, windows=[1], lags=[1]):
     '''
     Function get univariate timeseries dataframe on input and return new dataframes with difference feature
-    :type window_size: int
+    :param lags:
+    :param windows:
     :type timeseries: pandas.DataFrame
     :return: new dataframe
     '''
 
     result = pd.DataFrame(index=timeseries.index)
-    for i in range(1, window_size+1):
-        result[f'diff_{i}'] = timeseries.diff(i)
+    for i in lags:
+        for j in windows:
+            result[f'lag_{i}_diff_{j}'] = timeseries.shift(i).diff(i)
     return result
 
 
-def generate_rolwin_stat(timeseries, window_sizes, shifts=[1], statistics='mean'):
+def generate_rolwin_stat(timeseries, window_sizes, lags=[1], statistics='mean'):
     '''
     Function get univariate timeseries dataframe on input and return new dataframes with rolling statistic feature
+    :param statistics:
+    :param lags:
     :type window_sizes: list
     :type timeseries: pandas.DataFrame
     :return: new dataframe
@@ -55,17 +59,17 @@ def generate_rolwin_stat(timeseries, window_sizes, shifts=[1], statistics='mean'
 
     result = pd.DataFrametime(index=timeseries.index)
     for w in window_sizes:
-        for s in shifts:
+        for s in lags:
             result[f'roll_{w}_{statistics}'] = timeseries.shift(s).rolling(w).agg(statistics)
 
     return result
 
 
-def generate_expwin_stat(timeseries, window_sizes, shifts=[1], statistics='mean'):
+def generate_expwin_stat(timeseries, window_sizes, lags=[1], statistics='mean'):
     '''
     Function get univariate timeseries dataframe on input and return new dataframes with rolling statistic feature
-    :param shifts:
-    :param statistics:
+    :param lags:
+     :param statistics:
     :type window_sizes: int
     :type timeseries: pandas.DataFrame
     :return: new dataframe
@@ -73,7 +77,7 @@ def generate_expwin_stat(timeseries, window_sizes, shifts=[1], statistics='mean'
 
     result = pd.DataFrame(index=timeseries.index)
     for w in window_sizes:
-        for s in shifts:
+        for s in lags:
             result[f'exp_{w}_{statistics}'] = timeseries.shift(s).expanding(w).agg(statistics)
 
     return result
